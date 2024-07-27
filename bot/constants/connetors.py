@@ -1,4 +1,4 @@
-CONNECTORS_TYPE = {
+CONNECTORS_TYPE_MARKUP = {
     "CCS": "CCS",
     "Розетка Type 2": "Розетка Type 2",
     "Chademo": "Chademo",

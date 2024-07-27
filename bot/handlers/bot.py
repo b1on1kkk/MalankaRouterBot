@@ -2,13 +2,16 @@ import os
 import requests
 
 from telebot import TeleBot
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 from db import DatabaseRepository
 
 from models import ChargingPoint, List
 
-from constants import CONNECTORS_TYPE
+from utils import reply_markup_factory
+
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from constants import CONNECTORS_TYPE_MARKUP, BOT_ANSWERS, FIND_STATION_MARKUP
 
 class BotHandler:
     def __init__(self, bot: TeleBot):
@@ -21,35 +24,43 @@ class BotHandler:
         # connect to database 
         self.__repository.db_connect()
 
+
+
     ### commands ###
     def command_start_bot(self, message):
-        print(message.from_user.id)
+        self._bot.send_message(message.chat.id, BOT_ANSWERS["start"])
 
-        start_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-
-        nearby_chargers = KeyboardButton("Ближайшие зарядки", request_location=True)
-        start_markup.add(nearby_chargers)
-
-        self._bot.send_message(message.chat.id, "Привет! Я помогу тебе подобрать ближайшие свободные зарядные станции под твои критерии.", reply_markup=start_markup)
-    
     def command_choose_connector(self, message):
-        connectors_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=3)
+        connectors_markup = reply_markup_factory(CONNECTORS_TYPE_MARKUP)
+        self._bot.send_message(message.chat.id, BOT_ANSWERS["choose_connector"], reply_markup=connectors_markup)
 
-        for connector in CONNECTORS_TYPE.keys():
-            item_button = KeyboardButton(connector)
-            connectors_markup.add(item_button)
+    def command_find_station(self, message):
+        station_markup = reply_markup_factory(FIND_STATION_MARKUP, request_location=True)
+        self._bot.send_message(message.chat.id, BOT_ANSWERS["find_charger"], reply_markup=station_markup)
 
-        self._bot.send_message(message.chat.id, "Давай подберем нужный тебе коннектор...", reply_markup=connectors_markup)
+
 
     ### query ###
     def query_handle_location(self, message):
+        print(message)
+
         response: List[ChargingPoint] = [ChargingPoint(**station) for station in (requests.get(os.getenv("CHARGING_POINTS_API")).json())]
-        
+
         print(response[0].city)
-    
-    def query_connect_type(self, message):
-        self._bot.send_message(message.chat.id, "Коннектор определен!", reply_markup=ReplyKeyboardRemove())
+
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address1")],
+            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address2")],
+            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address3")]
+        ])
+
+        self._bot.send_message(message.chat.id, "Вот 3 ближайшии станции.", reply_markup=keyboard)
+
+    def query_connector_type(self, message):
+        self._bot.send_message(message.chat.id, BOT_ANSWERS["connector_type"])
+
+
 
     ### event ###
     def event_unsupported_text(self, message):
-        self._bot.send_message(message.chat.id, "Я Вас не понял, выберите правильную команду!", reply_markup=ReplyKeyboardRemove())
+        self._bot.send_message(message.chat.id, BOT_ANSWERS["unknown"])
