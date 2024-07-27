@@ -11,8 +11,9 @@ from handlers import BotHandler
 
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-###########################################################################
+from utils import sub_menu, main_menu
 
+###########################################################################
 bot = TeleBot(os.getenv("BOT_TOKEN"), parse_mode=None)
 bot_handler = BotHandler(bot)
 
@@ -41,14 +42,35 @@ def handle_location(message):
 def connect_type(message):
     bot_handler.query_connector_type(message=message)
 
-@bot.callback_query_handler(func=lambda call:call.data == "address1")
-def test(call):
-    new_keyboard = InlineKeyboardMarkup()
-    new_button = InlineKeyboardButton(text="Показать на карте", callback_data="location1")
-    new_back_button = InlineKeyboardButton(text="Назад", callback_data="back")
-    new_keyboard.add(new_button, new_back_button)
 
-    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Точнее адресс и какой то статус", reply_markup=new_keyboard)
+
+
+
+##############################################IN DEVELOPMENT##############################################
+
+### callbacks ###
+@bot.callback_query_handler(func=lambda call:call.data == "m1")
+def test(call):
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Точнее адресс + статус", reply_markup=sub_menu())
+
+@bot.callback_query_handler(func=lambda call:call.data == "main")
+def test(call):
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Вот 3 ближайшии станции.", reply_markup=main_menu())
+
+@bot.callback_query_handler(func=lambda call:call.data.startswith("charger_location"))
+def test(call):
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton(text="delete", callback_data="delete_location")],
+    ])
+
+    bot.send_location(chat_id=call.message.chat.id, latitude=53.95809, longitude=27.7, reply_markup=keyboard)
+
+@bot.callback_query_handler(func=lambda call:call.data == "delete_location")
+def test(call):
+    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+
+##############################################IN DEVELOPMENT##############################################
+
 
 
 

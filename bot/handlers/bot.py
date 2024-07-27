@@ -1,17 +1,20 @@
 import os
+import json
 import requests
 
 from telebot import TeleBot
+from telebot.types import ReplyKeyboardRemove
 
 from db import DatabaseRepository
 
+import decorators.user_existance
 from models import ChargingPoint, List
 
-from utils import reply_markup_factory
-
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+from utils import reply_markup_factory, main_menu
 
 from constants import CONNECTORS_TYPE_MARKUP, BOT_ANSWERS, FIND_STATION_MARKUP
+
+from decorators import user_existance
 
 class BotHandler:
     def __init__(self, bot: TeleBot):
@@ -21,7 +24,7 @@ class BotHandler:
             user=os.getenv("POSTGRES_USER"), 
             password=os.getenv("POSTGRES_PASSWORD"))
 
-        # connect to database 
+        # connect to database
         self.__repository.db_connect()
 
 
@@ -34,6 +37,7 @@ class BotHandler:
         connectors_markup = reply_markup_factory(CONNECTORS_TYPE_MARKUP)
         self._bot.send_message(message.chat.id, BOT_ANSWERS["choose_connector"], reply_markup=connectors_markup)
 
+    @user_existance
     def command_find_station(self, message):
         station_markup = reply_markup_factory(FIND_STATION_MARKUP, request_location=True)
         self._bot.send_message(message.chat.id, BOT_ANSWERS["find_charger"], reply_markup=station_markup)
@@ -41,23 +45,25 @@ class BotHandler:
 
 
     ### query ###
+    @user_existance
     def query_handle_location(self, message):
-        print(message)
+        self._bot.send_message(message.chat.id, "Местоположение установлено!", reply_markup=ReplyKeyboardRemove())
 
-        response: List[ChargingPoint] = [ChargingPoint(**station) for station in (requests.get(os.getenv("CHARGING_POINTS_API")).json())]
+        # print(message.from_user.id)
+        # response: List[ChargingPoint] = [ChargingPoint(**station) for station in (requests.get(os.getenv("CHARGING_POINTS_API")).json())]
+        # print(response[0].city)
 
-        print(response[0].city)
-
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address1")],
-            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address2")],
-            [InlineKeyboardButton(text="Какой то адрес тут", callback_data="address3")]
-        ])
-
-        self._bot.send_message(message.chat.id, "Вот 3 ближайшии станции.", reply_markup=keyboard)
+        self._bot.send_message(message.chat.id, "Вот 3 ближайшии станции.", reply_markup=main_menu())
 
     def query_connector_type(self, message):
-        self._bot.send_message(message.chat.id, BOT_ANSWERS["connector_type"])
+        res = None
+
+        if self.__repository.find_user_by_id(message.from_user.id):
+            res = self.__repository.update_user(user_id=message.from_user.id, connector=message.text)
+        else:
+            res = self.__repository.create_user(user_id=message.from_user.id, connector=message.text)
+
+        self._bot.send_message(message.chat.id, res, reply_markup=ReplyKeyboardRemove())
 
 
 
