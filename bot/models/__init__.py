@@ -1,2 +1,2 @@
-from .points import ChargingPoint
-from .points import List
+from .charging_points import ChargingPoint
+from .charging_points import List
