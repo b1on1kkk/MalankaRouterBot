@@ -4,11 +4,11 @@ load_dotenv()
 
 from telebot import TeleBot
 
-import controller
+# import controller
 
 def main():
     bot = TeleBot(os.getenv("BOT_TOKEN"), parse_mode=None)
-    controller.Controller(bot=bot)
+    # controller.Controller(bot=bot)
 
     bot.infinity_polling()
 

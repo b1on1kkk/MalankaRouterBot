@@ -1,1 +1,2 @@
 from .command_service import CommandBotService
+from .query_service import QueryBotService
