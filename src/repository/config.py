@@ -14,7 +14,7 @@ class DatabaseConfig:
         self.__connection: Optional[_connection] = None
 
     def connect(self) -> None:
-        if self.connection is None:
+        if self.__connection is None:
             try:
                 self.__connection = psycopg2.connect(
                     database=self.__database,

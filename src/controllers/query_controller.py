@@ -4,11 +4,13 @@ from services import QueryBotService
 
 from constants import CONNECTORS_TYPE_MARKUP
 
+from psycopg2.extensions import connection as cn
+
 class QueryBotController:
-    def __init__(self, bot: TeleBot) -> None:
+    def __init__(self, bot: TeleBot, connection: cn) -> None:
         self.__bot = bot
         self.__register_handlers()
-        self.__bot_service = QueryBotService(bot=bot)
+        self.__bot_service = QueryBotService(bot, connection)
 
     def __register_handlers(self) -> None:
         self.__bot.message_handler(content_types=["location"])(self.__get_location)
