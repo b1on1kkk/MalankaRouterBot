@@ -1,41 +1,48 @@
-from psycopg2.extensions import connection as cn, cursor as cu
+import asyncpg
+import asyncpg.cursor
+
+from repository import User
 
 from constants import BOT_ANSWERS
 
 class UserRepository:
-    def __init__(self, db_conn: cn):
-        self.__connection: cn = db_conn
-        self.__cursor: cu = db_conn.cursor()
+    def __init__(self, db_conn: asyncpg.Connection | None):
+        self.__connection: asyncpg.Connection | None = db_conn
 
-    def get_all(self):
-        try:
-            self.__cursor.execute("SELECT * FROM users")
-            return self.__cursor.fetchall()
-        except:
-            return BOT_ANSWERS["error"]
-
-
-    def find_user_by_id(self, user_id: int):
-        try:
-            self.__cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-            return self.__cursor.fetchone()
-        except:
-            return BOT_ANSWERS["error"]
+    async def get_all(self) -> list | str:
+        async with self.__connection.transaction():
+            try:
+                return await self.__connection.fetch("SELECT * FROM users")
+            except Exception as e:
+                print(e)
+                return BOT_ANSWERS["error"]
 
 
-    def create_user(self, user_id: int, connector: str):
-        try:
-            self.__cursor.execute("INSERT INTO users (id, connector_type) VALUES (%s, %s)", (user_id, connector))
-            self.__connection.commit()
-            return BOT_ANSWERS["connector_type"]
-        except:
-            return BOT_ANSWERS["error"]
+    async def find_user_by_id(self, user_id: int) -> User | str:
+        async with self.__connection.transaction():
+            try:    
+                user = await self.__connection.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
+                return user
+            except Exception as e:
+                print(e)
+                return BOT_ANSWERS["error"]
 
 
-    def update_user(self, user_id: int, connector: str):
-        try:
-            self.__cursor.execute("UPDATE users SET connector_type = %s WHERE id = %s", (connector, user_id))
-            self.__connection.commit()
-            return BOT_ANSWERS["connector_update"]
-        except:
-            return BOT_ANSWERS["error"]
+    async def create_user(self, user_id: int, connector: str) -> str:
+        async with self.__connection.transaction():
+            try:
+                await self.__connection.execute("INSERT INTO users (id, connector_type) VALUES ($1, $2)", user_id, connector)
+                return BOT_ANSWERS["connector_type"]
+            except Exception as e:
+                print(e)
+                return BOT_ANSWERS["error"]
+
+
+    async def update_user(self, user_id: int, connector: str) -> str:
+        async with self.__connection.transaction():
+            try:
+                await self.__connection.execute("UPDATE users SET connector_type = $1 WHERE id = $2", connector, user_id)
+                return BOT_ANSWERS["connector_update"]
+            except Exception as e:
+                print(e)
+                return BOT_ANSWERS["error"]

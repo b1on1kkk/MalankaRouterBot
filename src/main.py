@@ -1,25 +1,19 @@
 import os
+import asyncio
+import controller
+
 from dotenv import load_dotenv
 load_dotenv()
 
-from telebot import TeleBot
+from context import Connection
+from telebot.async_telebot import AsyncTeleBot
 
-import controller
+async def main():
+    async with Connection() as conn:
+            bot = AsyncTeleBot(os.getenv("BOT_TOKEN"))
+            controller.Controller(bot, conn)
 
-from repository import DatabaseConfig
-
-def main():
-    db = DatabaseConfig(
-        database=os.getenv("POSTGRES_DB"), 
-        user=os.getenv("POSTGRES_USER"), 
-        password=os.getenv("POSTGRES_PASSWORD"))
-
-    db.connect()
-
-    bot = TeleBot(os.getenv("BOT_TOKEN"), parse_mode=None)
-    controller.Controller(bot, db.get_connection())
-
-    bot.infinity_polling()
+            await bot.polling(non_stop=True)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -1,2 +1,3 @@
 from .repository import UserRepository
-from .config import DatabaseConfig
+from .config import DatabaseConnection
+from .user import User

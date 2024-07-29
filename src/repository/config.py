@@ -1,9 +1,7 @@
-import psycopg2
-from psycopg2.extensions import connection as _connection
-
+import asyncpg
 from typing import Optional
 
-class DatabaseConfig:
+class DatabaseConnection:
     def __init__(self, database: str, user: str, password: str, host: str = "localhost", port: str = "5432") -> None:
         self.__user: str = user
         self.__host: str = host
@@ -11,12 +9,12 @@ class DatabaseConfig:
         self.__database: str = database
         self.__password: str = password
 
-        self.__connection: Optional[_connection] = None
+        self.__connection: Optional[asyncpg.Connection] = None
 
-    def connect(self) -> None:
+    async def connect(self) -> asyncpg.Connection | None:
         if self.__connection is None:
             try:
-                self.__connection = psycopg2.connect(
+                self.__connection = await asyncpg.connect(
                     database=self.__database,
                     user=self.__user,
                     password=self.__password,
@@ -24,15 +22,14 @@ class DatabaseConfig:
                     port=self.__port
                 )
                 print('database connected')
-            except psycopg2.OperationalError as e:
-                print(f'connection error {e}')
-    
-    def get_connection(self) -> _connection:
-        return self.__connection
-    
-    def close(self) -> None:
-        try:
-            self.__connection.close()
-            print('connection closed')
-        except psycopg2.OperationalError as e:
-            print(f'error: {e}')
+                return self.__connection
+            except Exception as e:
+                print(f'connection error: {e}')
+
+    async def close(self):
+        if self.__connection is not None:
+            try:
+                await self.__connection.close()
+                print('connection closed')
+            except Exception as e:
+                print(f'error: {e}')

@@ -1,2 +1,3 @@
 from .command_controller import CommandBotController
 from .query_controller import QueryBotController
+from .callback_controller import CallbackBotController
