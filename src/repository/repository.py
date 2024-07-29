@@ -1,7 +1,7 @@
 import asyncpg
 import asyncpg.cursor
 
-from repository import User
+from .user import User
 
 from constants import BOT_ANSWERS
 
