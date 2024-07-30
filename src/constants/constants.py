@@ -11,7 +11,7 @@ BOT_ANSWERS = {
 
 CONNECTORS_TYPE_MARKUP = {
     "CCS": "CCS",
-    "Розетка Type 2": "Розетка Type 2",
+    "Розетка Type2": "Розетка Type2",
     "Chademo": "Chademo",
     "Пистолет Type2": "Пистолет Type2",
     "GBT": "GBT",

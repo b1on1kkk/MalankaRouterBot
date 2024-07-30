@@ -1,13 +1,11 @@
+import asyncpg
 from telebot import TeleBot
 from telebot.types import Message, ReplyKeyboardRemove
 
 from repository import UserRepository
+from utils import main_menu, find_closest_locations, get_chargers
 
 from constants import BOT_ANSWERS
-
-import asyncpg
-
-from utils import main_menu
 
 class QueryBotService:
     def __init__(self, bot: TeleBot, connection: asyncpg.Connection | None):
@@ -15,8 +13,13 @@ class QueryBotService:
         self.__repository = UserRepository(connection)
 
     async def get_location(self, message: Message):
-        await self.__bot.send_message(message.chat.id, "Местоположение установлено!", reply_markup=ReplyKeyboardRemove())
-        await self.__bot.send_message(message.chat.id, "Вот 3 ближайшии станции.", reply_markup=main_menu())
+        USER_LOCATION = {"latitude": message.location.latitude, "longitude": message.location.longitude}
+
+        user = await self.__repository.find_user_by_id(message.from_user.id)
+        chargers = await get_chargers(user["connector_type"], self.__bot, message.chat.id)
+        nearest_chargers = find_closest_locations(USER_LOCATION, chargers)
+
+        await self.__bot.send_message(message.chat.id, f"3 ближайшии станции с коннектором: <b><u>{user["connector_type"]}</u></b>", reply_markup=main_menu(nearest_chargers))
 
     async def set_connector_type(self, message: Message):
         res = None
