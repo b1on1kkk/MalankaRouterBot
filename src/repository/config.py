@@ -1,4 +1,7 @@
+import sys
+import logging
 import asyncpg
+
 from typing import Optional
 
 class DatabaseConnection:
@@ -23,13 +26,13 @@ class DatabaseConnection:
                 )
                 print('database connected')
                 return self.__connection
-            except Exception as e:
-                print(f'connection error: {e}')
+            except:
+                logging.error(sys.exc_info())
 
     async def close(self):
         if self.__connection is not None:
             try:
                 await self.__connection.close()
                 print('connection closed')
-            except Exception as e:
-                print(f'error: {e}')
+            except:
+                logging.error(sys.exc_info())

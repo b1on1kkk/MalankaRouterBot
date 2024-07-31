@@ -18,7 +18,6 @@ def main_menu(data: List[ChargingPoint]):
     buttons = []
 
     for index, item in enumerate(data):
-        print(item)
         buttons.append([InlineKeyboardButton(text=f"{item["name"]}, {item["street"]}, {item["house"]}, {item["city"]}", callback_data=f"m{index + 1}")])
 
     return InlineKeyboardMarkup(buttons)

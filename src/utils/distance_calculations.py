@@ -1,4 +1,6 @@
 import os
+import sys
+import logging
 import aiohttp
 import asyncio
 
@@ -6,6 +8,8 @@ from typing import Dict, List
 from interfaces import ChargingPoint
 
 from math import radians, sin, cos, sqrt, atan2
+
+from constants import BOT_ANSWERS
 
 class DistanceAPI:
     def __init__(self, user_connector: str):
@@ -16,13 +20,10 @@ class DistanceAPI:
     # get all charger points
     async def _get_chargers(self) -> List[ChargingPoint] | None:
         async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(f"{os.getenv('CHARGING_POINTS_API')}?connectors={self._user_connector}") as response:
-                    charger_locations: List[ChargingPoint] = await response.json()
-                    self._charger_locations = charger_locations
-                    return charger_locations
-            except:
-                print("Failed to fetch charger points")
+            async with session.get(f"{os.getenv('CHARGING_POINTS_API')}?connectors={self._user_connector}") as response:
+                charger_locations: List[ChargingPoint] = await response.json()
+                self._charger_locations = charger_locations
+                return charger_locations
 
 
     # get charger detailed info about each station in this charger point
@@ -46,8 +47,6 @@ class DistanceAPI:
             local_connectors[self._charger_locations[i]["locationId"]] = results[i]
 
         return local_connectors 
-
-
 
 
 
@@ -86,19 +85,23 @@ class Distance(DistanceAPI):
 
 
     async def find_location(self, n = 3) -> List[ChargingPoint]:
-        self._charger_locations = await self._get_chargers()
-        self._local_connectors = await self._connector_info()
+        try:
+            self._charger_locations = await self._get_chargers()
+            self._local_connectors = await self._connector_info()
 
-        filtered_locations = []
-        for location in self._charger_locations:
-            if (location["description"] is None or "за шлагбаумом" not in location["description"]) and self._is_connector_active(location["locationId"]):
-                filtered_locations.append(location)
+            filtered_locations = []
+            for location in self._charger_locations:
+                if (location["description"] is None or "за шлагбаумом" not in location["description"]) and self._is_connector_active(location["locationId"]):
+                    filtered_locations.append(location)
 
-        distances = []
-        for location in filtered_locations:
-            distance = self._calculate_distance(self._user_coords, {'latitude': location["latitude"], 'longitude': location["longitude"]})
-            distances.append((location, distance))
+            distances = []
+            for location in filtered_locations:
+                distance = self._calculate_distance(self._user_coords, {'latitude': location["latitude"], 'longitude': location["longitude"]})
+                distances.append((location, distance))
 
-        distances.sort(key=lambda x: x[1])
+            distances.sort(key=lambda x: x[1])
 
-        return [location for location, _ in distances[:n]]
+            return [location for location, _ in distances[:n]]
+        except:
+            logging.error(sys.exc_info())
+            raise Exception(BOT_ANSWERS["error"])
