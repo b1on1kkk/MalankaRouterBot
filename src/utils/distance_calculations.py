@@ -35,12 +35,12 @@ class DistanceAPI:
 
 
     async def _connector_info(self):
-        tasks = []
+        local = []
         for charger in self._charger_locations:
-            task = self._get_local_connector_info(charger["locationId"])
-            tasks.append(task)
+            connectors = self._get_local_connector_info(charger["locationId"])
+            local.append(connectors)
 
-        results = await asyncio.gather(*tasks)
+        results = await asyncio.gather(*local)
 
         local_connectors = {}
         for i in range(len(self._charger_locations)):

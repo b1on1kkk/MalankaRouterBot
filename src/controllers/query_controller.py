@@ -20,17 +20,21 @@ class QueryBotController:
         # for inner purposes before implementing DI (here is using in decorator)
         self.connection = connection
 
+
     def __register_handlers(self):
         self.__bot.message_handler(content_types=["location"])(self.__get_location)
         self.__bot.message_handler(func=lambda type: type.text in CONNECTORS_TYPE_MARKUP)(self.__set_connector_type)
         self.__bot.message_handler(func=lambda msg: True)(self.__unknown)
 
+
     @UnkConn
     async def __get_location(self, message: Message):
         await self.__bot_service.get_location(message)
 
+
     async def __set_connector_type(self, message: Message):
         await asyncio.create_task(self.__bot_service.set_connector_type(message))
+
 
     async def __unknown(self, message: Message):
         await self.__bot_service.unknown(message)

@@ -22,7 +22,7 @@ class QueryBotService:
             distance = Distance(USER_LOCATION, user["connector_type"])
             nearest_chargers = await distance.find_location()
 
-            await self.__bot.send_message(message.chat.id, f"3 ближайшии станции с коннектором: <b><u>{user["connector_type"]}</u></b>", reply_markup=main_menu(nearest_chargers))
+            await self.__bot.send_message(message.chat.id, f"Нашел по Вашим требованиям ({len(nearest_chargers)}): <b>{user["connector_type"]}</b>", reply_markup=main_menu(nearest_chargers))
         except Exception as error_message:
             await self.__bot.send_message(message.chat.id, str(error_message), reply_markup=ReplyKeyboardRemove())
 

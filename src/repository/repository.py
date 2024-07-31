@@ -3,7 +3,7 @@ import logging
 import asyncpg
 import asyncpg.cursor
 
-from .user import User
+from interfaces import User
 
 from constants import BOT_ANSWERS
 
