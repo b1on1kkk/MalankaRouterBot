@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 import aiohttp
 import asyncio
@@ -26,7 +25,7 @@ class DistanceAPI:
                 return charger_locations
 
 
-    # get charger detailed info about each station in this charger point
+    # get charger info about each station in the charger point
     async def _get_local_connector_info(self, id: str):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{os.getenv('LOCATION_INF')}?locationId={id}") as response:
@@ -102,6 +101,6 @@ class Distance(DistanceAPI):
             distances.sort(key=lambda x: x[1])
 
             return [location for location, _ in distances[:n]]
-        except:
-            logging.error(sys.exc_info())
+        except Exception as e:
+            logging.error(e)
             raise Exception(BOT_ANSWERS["error"])

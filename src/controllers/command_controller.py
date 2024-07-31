@@ -13,8 +13,8 @@ class CommandBotController:
 
     def __register_handlers(self):
         self.__bot.message_handler(commands=["start"])(self.__send_hello)
-        self.__bot.message_handler(commands=["setconnector"])(self.__set_connector)
         self.__bot.message_handler(commands=["find"])(self.__find_charger)
+        self.__bot.message_handler(commands=["setconnector"])(self.__set_connector)
 
 
     async def __send_hello(self, message: Message):

@@ -16,8 +16,8 @@ class UserRepository:
         async with self.__connection.transaction():
             try:
                 return await self.__connection.fetch("SELECT * FROM users")
-            except:
-                logging.error(sys.exc_info())
+            except asyncpg.PostgresError as e:
+                logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
 
 
@@ -26,8 +26,8 @@ class UserRepository:
             try:    
                 user = await self.__connection.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
                 return user
-            except:
-                logging.error(sys.exc_info())
+            except asyncpg.PostgresError as e:
+                logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
 
 
@@ -35,8 +35,8 @@ class UserRepository:
         async with self.__connection.transaction():
             try:
                 await self.__connection.execute("INSERT INTO users (id, connector_type) VALUES ($1, $2)", user_id, connector)
-            except:
-                logging.error(sys.exc_info())
+            except asyncpg.PostgresError as e:
+                logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
 
 
@@ -44,6 +44,6 @@ class UserRepository:
         async with self.__connection.transaction():
             try:
                 await self.__connection.execute("UPDATE users SET connector_type = $1 WHERE id = $2", connector, user_id)
-            except:
-                logging.error(sys.exc_info())
+            except asyncpg.PostgresError as e:
+                logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])

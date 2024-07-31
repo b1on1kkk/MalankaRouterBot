@@ -1,4 +1,3 @@
-import sys
 import logging
 
 from functools import wraps
@@ -20,8 +19,9 @@ def UnkConn(method):
                 return await method(self, message)
             
             await BOT.send_message(message.chat.id, BOT_ANSWERS["forbidden"])
-        except:
-            logging.error(sys.exc_info())
-            raise
+        except Exception as e:
+            logging.error(e)
+            raise Exception(BOT_ANSWERS["error"])
+
 
     return async_wrapper
