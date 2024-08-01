@@ -25,7 +25,7 @@ class QueryBotService:
             distance = Distance(USER_LOCATION, user["connector_type"])
             nearest_chargers = await distance.find_location()
 
-            await self.__bot.edit_message_text(f"Нашел по Вашим требованиям {len(nearest_chargers)} станции с <b>{user["connector_type"]}</b> типом коннектора.", message.chat.id, loading_text.message_id, reply_markup=main_menu(nearest_chargers))
+            await self.__bot.edit_message_text(f"Нашел по Вашим требованиям {len(nearest_chargers)} станции с <b>{user['connector_type']}</b> типом коннектора.", message.chat.id, loading_text.message_id, reply_markup=main_menu(nearest_chargers))
         except asyncio_helper.ApiTelegramException as telegram_message:
             logging.error(telegram_message)
             await self.__bot.send_message(message.chat.id, BOT_ANSWERS["error"], reply_markup=ReplyKeyboardRemove())
