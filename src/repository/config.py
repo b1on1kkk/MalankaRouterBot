@@ -4,7 +4,7 @@ import asyncpg
 from typing import Optional
 
 class DatabaseConnection:
-    def __init__(self, database: str, user: str, password: str, host: str = "localhost", port: str = "5432") -> None:
+    def __init__(self, database: str, user: str, password: str, host: str, port: str) -> None:
         self.__user: str = user
         self.__host: str = host
         self.__port: str = port
