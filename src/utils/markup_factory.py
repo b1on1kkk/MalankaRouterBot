@@ -1,8 +1,6 @@
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
-
+from typing import List, Tuple
 from interfaces import ChargingPoint
-
-from typing import List
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 def markup_factory(data: dict, **kwargs) -> ReplyKeyboardMarkup:
     markup = ReplyKeyboardMarkup(resize_keyboard=kwargs.get("resize_keyboard", True))
@@ -13,14 +11,13 @@ def markup_factory(data: dict, **kwargs) -> ReplyKeyboardMarkup:
 
     return markup
 
-def main_menu(data: List[ChargingPoint]):
+def main_menu(data: List[Tuple[ChargingPoint, int]]):
     buttons = []
 
     for index, item in enumerate(data):
-        point = {"lon": item["longitude"], "lat": item["latitude"]}
-
+        point = {"lon": item[0]["longitude"], "lat": item[0]["latitude"]}
         buttons.append([
-            InlineKeyboardButton(text=f"{item['name']}, {item['street']}, {item['house']}, {item['city']}", callback_data=f"loc{index};{point}")
+            InlineKeyboardButton(text=f"Показать станцию. До станции ~{round(item[1])} км.", callback_data=f"loc{index};{point}")
         ])
 
     return InlineKeyboardMarkup(buttons)

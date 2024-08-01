@@ -88,19 +88,20 @@ class Distance(DistanceAPI):
             self._charger_locations = await self._get_chargers()
             self._local_connectors = await self._connector_info()
 
-            filtered_locations = []
+            filtered_locations = list()
             for location in self._charger_locations:
                 if (location["description"] is None or "за шлагбаумом" not in location["description"]) and self._is_connector_active(location["locationId"]):
                     filtered_locations.append(location)
 
-            distances = []
+            distances = list()
             for location in filtered_locations:
-                distance = self._calculate_distance(self._user_coords, {'latitude': location["latitude"], 'longitude': location["longitude"]})
+                location_coords = {"latitude": location["latitude"], "longitude": location["longitude"]}
+                distance = self._calculate_distance(self._user_coords, location_coords)
                 distances.append((location, distance))
 
             distances.sort(key=lambda x: x[1])
 
-            return [location for location, _ in distances[:n]]
+            return [(location, distance) for location, distance in distances[:n]]
         except Exception as e:
             logging.error(e)
             raise Exception(BOT_ANSWERS["error"])
