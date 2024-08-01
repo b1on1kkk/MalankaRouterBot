@@ -1,1 +1,1 @@
-# 🛠️ The bot is in prerelease status; documentation will be available soon. 🛠️
+# 🛠️ The bot is in beta status; documentation will be available soon. 🛠️
