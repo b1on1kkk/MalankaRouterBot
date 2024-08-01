@@ -20,7 +20,7 @@ def main_menu(data: List[ChargingPoint]):
         point = {"lon": item["longitude"], "lat": item["latitude"]}
 
         buttons.append([
-            InlineKeyboardButton(text=f"{item["name"]}, {item["street"]}, {item["house"]}, {item["city"]}", callback_data=f"loc{index};{point}")
+            InlineKeyboardButton(text=f"{item['name']}, {item['street']}, {item['house']}, {item['city']}", callback_data=f"loc{index};{point}")
         ])
 
     return InlineKeyboardMarkup(buttons)
