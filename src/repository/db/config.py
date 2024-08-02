@@ -13,6 +13,7 @@ class DatabaseConnection:
 
         self.__connection: Optional[asyncpg.Connection] = None
 
+
     async def connect(self) -> asyncpg.Connection | None:
         if self.__connection is None:
             try:
@@ -23,15 +24,22 @@ class DatabaseConnection:
                     host=self.__host,
                     port=self.__port
                 )
+
+                # check if database connected
+                await self.__connection.execute('SELECT 1')
+
                 print('database connected')
+
                 return self.__connection
             except asyncpg.PostgresError as e:
                 logging.error(e)
+                print(f"Failed to connect or ping the database: {e}")
+
 
     async def close(self):
         if self.__connection is not None:
             try:
                 await self.__connection.close()
-                print('connection closed')
+                print('database connection closed')
             except asyncpg.PostgresError as e:
                 logging.error(e)

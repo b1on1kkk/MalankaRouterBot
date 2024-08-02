@@ -1,3 +1,4 @@
+import hashlib
 import logging
 
 from functools import wraps
@@ -10,18 +11,19 @@ from constants import BOT_ANSWERS
 def UnkConn(method):
     @wraps(method)
     async def async_wrapper(self, message: Message):
+        BOT = getattr(self, f"_{self.__class__.__name__}__bot")
+        ID_HASH = hashlib.sha256(str(message.from_user.id).encode()).hexdigest()
+
         try:
-            BOT = getattr(self, f"_{self.__class__.__name__}__bot")
-
             repository = UserRepository(self.connection)
+            user = await repository.find_user_by_id(ID_HASH)
 
-            if await repository.find_user_by_id(message.from_user.id):
-                return await method(self, message)
-            
+            if user: return await method(self, message, user)
+
             await BOT.send_message(message.chat.id, BOT_ANSWERS["forbidden"])
         except Exception as e:
             logging.error(e)
-            raise Exception(BOT_ANSWERS["error"])
+            await BOT.send_message(message.chat.id, BOT_ANSWERS["error"])
 
 
     return async_wrapper

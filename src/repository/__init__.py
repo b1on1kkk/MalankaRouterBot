@@ -1,2 +1,4 @@
-from .repository import UserRepository
-from .config import DatabaseConnection
+from .db.repository import UserRepository
+from .db.config import DatabaseConnection
+
+from .redis.config import RedisConnection

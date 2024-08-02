@@ -8,6 +8,8 @@ from services import QueryBotService
 
 from decorators import UnkConn
 
+from interfaces import User
+
 from constants import CONNECTORS_TYPE_MARKUP
 
 class QueryBotController:
@@ -28,8 +30,8 @@ class QueryBotController:
 
 
     @UnkConn
-    async def __get_location(self, message: Message):
-        await self.__bot_service.get_location(message)
+    async def __get_location(self, message: Message, user: User):
+        await self.__bot_service.get_location(message, user)
 
 
     async def __set_connector_type(self, message: Message):
