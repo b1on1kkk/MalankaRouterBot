@@ -12,15 +12,15 @@ def markup_factory(data: dict, **kwargs) -> ReplyKeyboardMarkup:
     return markup
 
 def main_menu(data: List[Tuple[ChargingPoint, int]]):
-    buttons = []
+    markup = InlineKeyboardMarkup()
 
-    for index, item in enumerate(data):
-        point = {"lon": item[0]["longitude"], "lat": item[0]["latitude"]}
-        buttons.append([
-            InlineKeyboardButton(text=f"Показать станцию. До станции ~{round(item[1])} км.", callback_data=f"loc{index};{point}")
-        ])
+    for _, item in enumerate(data):
+        if item[1] < 1:
+            markup.add(InlineKeyboardButton(text=f"Показать станцию. До станции ~{round(round(item[1], 2) * 1000)} м.", callback_data=f"loc:{item[0]['locationId']}"))
+        else:
+            markup.add(InlineKeyboardButton(text=f"Показать станцию. До станции ~{round(item[1])} км.", callback_data=f"loc:{item[0]['locationId']}"))
 
-    return InlineKeyboardMarkup(buttons)
+    return markup
 
 def delete_location():
     return InlineKeyboardMarkup([

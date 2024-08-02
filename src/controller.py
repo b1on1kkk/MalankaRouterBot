@@ -7,4 +7,4 @@ class Controller:
     def __init__(self, bot: TeleBot, connection: Connection | None, redis: Redis | None):
         CommandBotController(bot)
         QueryBotController(bot, connection, redis)
-        CallbackBotController(bot)
+        CallbackBotController(bot, redis)

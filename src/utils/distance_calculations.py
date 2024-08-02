@@ -1,8 +1,10 @@
 import os
+import json
 import logging
 import aiohttp
 import asyncio
 
+from redis.asyncio import Redis
 from typing import Dict, List, Tuple
 from interfaces import ChargingPoint
 
@@ -50,8 +52,9 @@ class DistanceAPI:
 
 
 class Distance(DistanceAPI):
-    def __init__(self, user_coords: Dict[str, float], user_connector: str):
+    def __init__(self, user_coords: Dict[str, float], user_connector: str, redis: Redis):
         super().__init__(user_connector)
+        self._redis = redis
         self._user_coords = user_coords
         self._local_connectors = None
         self._charger_locations = None
@@ -71,6 +74,7 @@ class Distance(DistanceAPI):
 
         distance = R * c
 
+        # result in km
         return distance       
 
 
@@ -83,25 +87,50 @@ class Distance(DistanceAPI):
         return False
 
 
-    async def find_location(self, n = 3) -> List[Tuple[ChargingPoint, int]]:
+    def __filter_locations(self) -> List[ChargingPoint]:
+        filtered_locations: List[ChargingPoint] = list()
+
+        for location in self._charger_locations:
+            if (location["description"] is None or "за шлагбаумом" not in location["description"]) and self._is_connector_active(location["locationId"]):
+                filtered_locations.append(location)   
+
+        return filtered_locations
+
+
+    async def __find_closest(self, n = 3) -> List[Tuple[ChargingPoint, int]]:
+        filtered_locations = self.__filter_locations()
+
+        distances: List[Tuple[ChargingPoint, int]] = list()
+        for location in filtered_locations:
+            location_coords = {"latitude": location["latitude"], "longitude": location["longitude"]}
+            distance = self._calculate_distance(self._user_coords, location_coords)
+            distances.append((location, distance))
+
+        distances.sort(key=lambda x: x[1])
+
+        await self.__cache_stations(distances, n)
+
+        return [(location, distance) for location, distance in distances[:n]]
+
+
+    async def __cache_stations(self, distances: List[Tuple[ChargingPoint, int]], n: int):
+        queries = []
+        for item, _ in distances[:n]:
+            KEY = item["locationId"]
+            STATION = {"locationId": id, "lon": item["longitude"], "lat": item["latitude"]}
+            queries.append(self._redis.set(KEY, json.dumps(STATION), ex=120))
+
+        await asyncio.gather(*queries)
+
+
+    async def find_location(self) -> List[Tuple[ChargingPoint, int]]:
         try:
             self._charger_locations = await self._get_chargers()
             self._local_connectors = await self._connector_info()
 
-            filtered_locations = list()
-            for location in self._charger_locations:
-                if (location["description"] is None or "за шлагбаумом" not in location["description"]) and self._is_connector_active(location["locationId"]):
-                    filtered_locations.append(location)
+            locations = await self.__find_closest()
 
-            distances = list()
-            for location in filtered_locations:
-                location_coords = {"latitude": location["latitude"], "longitude": location["longitude"]}
-                distance = self._calculate_distance(self._user_coords, location_coords)
-                distances.append((location, distance))
-
-            distances.sort(key=lambda x: x[1])
-
-            return [(location, distance) for location, distance in distances[:n]]
+            return locations
         except Exception as e:
             logging.error(e)
             raise Exception(BOT_ANSWERS["error"])
