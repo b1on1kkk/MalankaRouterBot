@@ -3,7 +3,7 @@ import logging
 import aiohttp
 import asyncio
 
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from interfaces import ChargingPoint
 
 from math import radians, sin, cos, sqrt, atan2
@@ -83,7 +83,7 @@ class Distance(DistanceAPI):
         return False
 
 
-    async def find_location(self, n = 3) -> List[ChargingPoint]:
+    async def find_location(self, n = 3) -> List[Tuple[ChargingPoint, int]]:
         try:
             self._charger_locations = await self._get_chargers()
             self._local_connectors = await self._connector_info()

@@ -2,6 +2,7 @@ import asyncio
 from telebot import TeleBot
 
 from asyncpg import Connection
+from redis.asyncio import Redis
 from telebot.types import Message
 
 from services import QueryBotService
@@ -13,11 +14,11 @@ from interfaces import User
 from constants import CONNECTORS_TYPE_MARKUP
 
 class QueryBotController:
-    def __init__(self, bot: TeleBot, connection: Connection | None):
+    def __init__(self, bot: TeleBot, connection: Connection | None, redis: Redis | None):
         self.__bot = bot
         self.__register_handlers()
 
-        self.__bot_service = QueryBotService(bot, connection)
+        self.__bot_service = QueryBotService(bot, connection, redis)
 
         # for inner purposes before implementing DI (here is using in decorator)
         self.connection = connection

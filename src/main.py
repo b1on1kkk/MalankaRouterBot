@@ -19,7 +19,7 @@ async def main():
         redis = await stack.enter_async_context(RedisContext())
 
         bot = AsyncTeleBot(os.getenv("BOT_TOKEN"), parse_mode="HTML")
-        controller.Controller(bot, conn)
+        controller.Controller(bot, conn, redis)
 
         await bot.polling(non_stop=True)
 

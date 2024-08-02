@@ -1,5 +1,5 @@
 import os
-import asyncpg
+from asyncpg import Connection
 from repository import DatabaseConnection
 
 class PostgresConnection:
@@ -12,7 +12,7 @@ class PostgresConnection:
             port=os.getenv("POSTGRES_PORT"))
 
 
-    async def __aenter__(self) -> asyncpg.Connection | None:
+    async def __aenter__(self) -> Connection | None:
         return await self.__db.connect()
 
 
