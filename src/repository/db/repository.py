@@ -20,29 +20,29 @@ class UserRepository:
                 raise Exception(BOT_ANSWERS["error"])
 
 
-    async def find_user_by_id(self, user_id: int) -> User | None:
+    async def find_user_by_id(self, id_hash: str) -> User | None:
         async with self.__connection.transaction():
             try:    
-                user = await self.__connection.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
+                user = await self.__connection.fetchrow("SELECT * FROM users WHERE id_hash = $1", id_hash)
                 return user
             except asyncpg.PostgresError as e:
                 logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
 
 
-    async def create_user(self, user_id: int, connector: str) -> None:
+    async def create_user(self, id_hash: str, connector: str) -> None:
         async with self.__connection.transaction():
             try:
-                await self.__connection.execute("INSERT INTO users (id, connector_type) VALUES ($1, $2)", user_id, connector)
+                await self.__connection.execute("INSERT INTO users (id_hash, connector_type) VALUES ($1, $2)", id_hash, connector)
             except asyncpg.PostgresError as e:
                 logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
 
 
-    async def update_user(self, user_id: int, connector: str) -> None:
+    async def update_user(self, id_hash: str, connector: str) -> None:
         async with self.__connection.transaction():
             try:
-                await self.__connection.execute("UPDATE users SET connector_type = $1 WHERE id = $2", connector, user_id)
+                await self.__connection.execute("UPDATE users SET connector_type = $1 WHERE id_hash = $2", connector, id_hash)
             except asyncpg.PostgresError as e:
                 logging.error(e)
                 raise Exception(BOT_ANSWERS["error"])
