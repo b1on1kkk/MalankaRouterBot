@@ -6,7 +6,8 @@ class RedisContext:
     def __init__(self):
         self.__redis = RedisConnection(
             host=os.getenv("REDIS_HOST"),
-            port=os.getenv("REDIS_PORT"))
+            port=os.getenv("REDIS_PORT"),
+            password=os.getenv("REDIS_PASSWORD"))
 
 
     async def __aenter__(self) -> Redis | None:
