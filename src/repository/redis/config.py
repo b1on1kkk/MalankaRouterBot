@@ -3,9 +3,10 @@ from redis.asyncio import Redis, RedisError
 from typing import Optional
 
 class RedisConnection:
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, password: str):
         self.__host = host
         self.__port = port
+        self.__password = password
 
         self.__r: Optional[Redis] = None
 
@@ -16,8 +17,9 @@ class RedisConnection:
                 self.__r = Redis(
                     host=self.__host, 
                     port=self.__port,
+                    password=self.__password,
                     db=0,
-                    socket_timeout=5
+                    socket_timeout=5,
                 )
                 
                 response = await self.__r.ping()
