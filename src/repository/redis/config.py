@@ -19,7 +19,7 @@ class RedisConnection:
                     port=self.__port,
                     password=self.__password,
                     db=0,
-                    socket_timeout=5
+                    socket_timeout=5,
                 )
                 
                 response = await self.__r.ping()

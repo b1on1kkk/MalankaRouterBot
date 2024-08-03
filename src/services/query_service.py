@@ -35,7 +35,7 @@ class QueryBotService:
             if cached_data:
                 nearest_chargers = json.loads(cached_data)
             else:
-                distance = Distance(USER_LOCATION, user["connector_type"])
+                distance = Distance(USER_LOCATION, user["connector_type"], self.__redis)
                 nearest_chargers = await distance.find_location()
 
                 await self.__redis.set(cache_key, json.dumps(nearest_chargers), ex=60)
@@ -47,6 +47,7 @@ class QueryBotService:
             logging.error(telegram_message)
             await self.__bot.edit_message_text(BOT_ANSWERS["error"], message.chat.id, loading_text.message_id, reply_markup=ReplyKeyboardRemove())
         except Exception as error_message:
+            logging.error(error_message)
             await self.__bot.edit_message_text(str(error_message), message.chat.id, loading_text.message_id, reply_markup=ReplyKeyboardRemove())
 
 
