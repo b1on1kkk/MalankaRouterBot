@@ -6,7 +6,7 @@ import asyncio
 
 from redis.asyncio import Redis
 from typing import Dict, List, Tuple
-from interfaces import ChargingPoint
+from interfaces import ChargingPoint, RootDevice
 
 from math import radians, sin, cos, sqrt, atan2
 
@@ -28,10 +28,10 @@ class DistanceAPI:
 
 
     # get charger info about each station in the charger point
-    async def _get_local_connector_info(self, id: str):
+    async def _get_local_connector_info(self, id: str) -> RootDevice | None:
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{os.getenv('LOCATION_INF')}?locationId={id}") as response:
-                devices: List[ChargingPoint] = await response.json()
+                devices: RootDevice | None = await response.json()
                 return devices
 
 
@@ -117,7 +117,7 @@ class Distance(DistanceAPI):
         queries = []
         for item, _ in distances[:n]:
             KEY = item["locationId"]
-            STATION = {"locationId": id, "lon": item["longitude"], "lat": item["latitude"]}
+            STATION = {"locationId": KEY, "lon": item["longitude"], "lat": item["latitude"]}
             queries.append(self._redis.set(KEY, json.dumps(STATION), ex=120))
 
         await asyncio.gather(*queries)

@@ -22,7 +22,7 @@ def main_menu(data: List[Tuple[ChargingPoint, int]]):
 
     return markup
 
-def delete_location():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(text="Удалить", callback_data="delete")]
-    ])
+def link_to_yandex_maps(coordinates):
+    markup = InlineKeyboardMarkup()
+    markup.add(InlineKeyboardButton(text="Перейти в Яндекс", url=f"https://yandex.by/maps/?ll={round(coordinates["lon"], 6)}%2C{round(coordinates["lat"], 6)}&z=19"))
+    return markup
