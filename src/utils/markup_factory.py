@@ -24,5 +24,5 @@ def main_menu(data: List[Tuple[ChargingPoint, int]]):
 
 def link_to_yandex_maps(coordinates):
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton(text="Перейти в Яндекс", url=f"https://yandex.by/maps/?ll={round(coordinates["lon"], 6)}%2C{round(coordinates["lat"], 6)}&z=19"))
+    markup.add(InlineKeyboardButton(text="Перейти в Яндекс", url=f"https://yandex.by/maps/?ll={round(coordinates['lon'], 6)}%2C{round(coordinates['lat'], 6)}&z=19"))
     return markup
