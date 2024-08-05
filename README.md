@@ -25,9 +25,12 @@ REDIS_PORT="..."
 REDIS_PASSWORD="..."
 ```
 
-
 Run project:
 
 ```bash
   py main.py
 ```
+
+# How to get `BOT_TOKEN`?
+
+Read official [BotFather docs](https://core.telegram.org/bots/tutorial)
